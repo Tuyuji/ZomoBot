@@ -13,10 +13,7 @@ namespace Zomo.Core.Tests
             _config = new Config(ConfigFileLocation);
         }
 
-        /*
-         * Does config correctly save?
-         */
-        [Test]
+        [Test(Author = "Reece Hagan", Description = "Checks to see if Config::Save works as intended.")]
         public void Save_Works()
         {
             const string varName = "Save_Works";
@@ -30,11 +27,8 @@ namespace Zomo.Core.Tests
 
             Assert.AreEqual(varValue, value);
         }
-
-        /*
-         * Does config correctly load?
-         */
-        [Test]
+        
+        [Test(Author = "Reece Hagan", Description = "Checks to see if Config::Load will overwrite any data not saved.")]
         public void Load_Works()
         {
             const string varName = "Load_Works";
