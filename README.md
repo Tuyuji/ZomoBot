@@ -1,0 +1,2 @@
+# ZomoBot
+A Discord bot.
