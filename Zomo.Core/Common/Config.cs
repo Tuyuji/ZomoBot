@@ -12,7 +12,7 @@ namespace Zomo.Core
     public class Config : IDisposable
     {
         private Dictionary<string, object> _data = new Dictionary<string, object>();
-        private string _configFilePath;
+        private readonly string _configFilePath;
         
         public Config(string filePath)
         {
