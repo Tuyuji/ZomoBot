@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Zomo.Core.Common;
 
 namespace Zomo.Core.Tests
 {

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
-namespace Zomo.Core
+namespace Zomo.Core.Common
 {
     /*
      * A simple class that you construct with a file path.
@@ -11,7 +12,7 @@ namespace Zomo.Core
      */
     public class Config : IDisposable
     {
-        private Dictionary<string, object> _data = new Dictionary<string, object>();
+        private dynamic _data;
         private readonly string _configFilePath;
         
         public Config(string filePath)
@@ -22,17 +23,17 @@ namespace Zomo.Core
 
         public bool HasVar(string name)
         {
-            return _data.ContainsKey(name);
+            return _data[name] != null;
         }
         
         public void Store(string name, object value)
         {
-            _data[name] = value;
+            _data[name] = JToken.FromObject(value);
         }
 
         public T Get<T>(string name)
         {
-            return (T)_data[name];
+            return _data[name].ToObject<T>();
         }
 
         public void Save()
@@ -47,7 +48,7 @@ namespace Zomo.Core
         {
             if (File.Exists(_configFilePath))
             {
-                _data = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(_configFilePath));
+                _data = JsonConvert.DeserializeObject(File.ReadAllText(_configFilePath));
                 return true;
             }
 
