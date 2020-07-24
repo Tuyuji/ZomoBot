@@ -1,6 +1,10 @@
 using System;
-using System.Threading.Tasks;
+using System.Reflection;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Zomo.Core.Common;
 using Zomo.Core.Interfaces;
 
 namespace Zomo.Core.Services
@@ -10,17 +14,20 @@ namespace Zomo.Core.Services
     {
         private readonly IServiceProvider _services;
         private readonly Config _config;
+        private readonly DiscordSocketClient _client;
+        private readonly CommandService _command;
 
         public BotService(IServiceProvider services)
         {
-            Console.WriteLine("Bot service constructor.");
             _services = services;
             _config = _services.GetRequiredService<Config>();
+            _client = _services.GetRequiredService<DiscordSocketClient>();
+            _command = _services.GetRequiredService<CommandService>();
         }
-        
+
         public void ServiceStart()
         {
-            Console.WriteLine("Bot service start.");
+            Logger.Write(ZomoApplication.Instance.AppName, "Bot service start.");
             if (!_config.HasVar("Token"))
             {
                 Console.Write("Token: ");
@@ -29,18 +36,25 @@ namespace Zomo.Core.Services
                 _config.Store("Token", token);
                 _config.Save();
             }
-            
-            
+
+            _command.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                _command.AddModulesAsync(assembly, _services);
+            }
+
+            _client.Log += Logger.Write;
+
+            _client.LoginAsync(TokenType.Bot, _config.Get<string>("Token"));
+            _client.StartAsync();
         }
 
         public void ServicePostStart()
         {
-            Console.WriteLine("Bot service post start.");
         }
 
         public void ServiceDispose()
         {
-            
         }
     }
 }

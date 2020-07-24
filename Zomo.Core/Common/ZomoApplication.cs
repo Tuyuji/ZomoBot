@@ -4,17 +4,29 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
+using Google.Apis.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Zomo.Core.Interfaces;
-using Zomo.Core.Services;
 
-namespace Zomo.Core
+namespace Zomo.Core.Common
 {
-    public class ZomoBot
+    public abstract class ZomoApplication
     {
+        private static ZomoApplication _instance;
+
+        private string _appName;
         private Config _botConfig = new Config("bot.cfg");
         private Dictionary<Type, BotServiceInfo> _botServices = new Dictionary<Type, BotServiceInfo>();
-        
+
+        public static ZomoApplication Instance => _instance;
+        public string AppName => _appName;
+
+        public ZomoApplication(string appName = "Zomo")
+        {
+            _instance = this;
+            _appName = appName;
+        }
+
         public async Task Start()
         {
             var services = new ServiceCollection()
@@ -23,22 +35,22 @@ namespace Zomo.Core
                 .AddSingleton(new CommandService());
 
             AddBotServices(ref services);
-            
+
             var serviceProvider = services.BuildServiceProvider();
-            
+
             //Start all the services which the bot is in.
             foreach (var service in _botServices)
             {
-                IBotService botService = (IBotService)serviceProvider.GetRequiredService(service.Key);
+                IBotService botService = (IBotService) serviceProvider.GetRequiredService(service.Key);
                 botService.ServiceStart();
             }
-                
+
 
             //Now that all the services with the bot started
             //we call post start, mostly a just in case function.
             foreach (var service in _botServices)
             {
-                IBotService botService = (IBotService)serviceProvider.GetRequiredService(service.Key);
+                IBotService botService = (IBotService) serviceProvider.GetRequiredService(service.Key);
                 botService.ServicePostStart();
             }
 
@@ -54,7 +66,7 @@ namespace Zomo.Core
                 .Where(p => p.IsClass);
 
             var unsortedInfos = new Dictionary<Type, BotServiceInfo>();
-            
+
             foreach (var service in types)
             {
                 Attribute[] attributes = Attribute.GetCustomAttributes(service);
@@ -63,9 +75,9 @@ namespace Zomo.Core
                     if (attr is BotServiceInfo serviceInfo)
                         unsortedInfos[service] = serviceInfo;
             }
-            
+
             var sortedInfos = from pair in unsortedInfos orderby (int) pair.Value.Priority select pair;
-            
+
             foreach (var service in sortedInfos)
             {
                 _botServices.Add(service.Key, service.Value);

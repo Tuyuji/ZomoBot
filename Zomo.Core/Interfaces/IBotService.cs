@@ -17,21 +17,23 @@ namespace Zomo.Core.Interfaces
         public BotServiceInfo(string name, string about, ServicePriority priority)
         {
             this.Name = name;
-            this.About = About;
+            this.About = about;
             this.Priority = priority;
         }
-        
+
         public string Name { get; }
         public string About { get; }
         public ServicePriority Priority { get; }
     }
-    
+
     public interface IBotService
     {
         //Called before bot start
         void ServiceStart();
+
         //Called after bot start
         void ServicePostStart();
+
         //Called when shutting down
         void ServiceDispose();
     }
