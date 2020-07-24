@@ -1,7 +1,7 @@
 # ZomoBot
 A Discord bot.
 
-##Projects
+## Projects
 
 - Zomo.Core: All the stuff needed to run the bot.
 - Zomo.Server: The app that boots up and is primed for use in a dedicated server.
