@@ -7,7 +7,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Zomo.Core\Zomo.Core.csproj"/>
-        <ProjectReference Include="..\Zomo.ShineBot\Zomo.ShineBot.csproj"/>
     </ItemGroup>
 
 </Project>
