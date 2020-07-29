@@ -15,18 +15,16 @@ namespace Zomo.Core.Common
         public virtual void Destroy()
         {
             foreach (var module in _registeredModules)
-            {
                 ZomoApplication.Instance.CommandService.RemoveModuleAsync(module);
-            }
         }
 
         public async Task<bool> RegisterModule(Type module)
         {
             if (!module.IsClass)
-                return false;
+                throw new Exception("The given type isn't a class.");
 
             if (!module.IsSubclassOf(typeof(ModuleBase<SocketCommandContext>)))
-                return false;
+                throw new Exception("The given type isn't a ModuleBase<SocketCommandContext>");
 
             var res = await ZomoApplication.Instance.CommandService.AddModuleAsync(module,
                 ZomoApplication.Instance.Services);
