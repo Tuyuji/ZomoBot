@@ -24,7 +24,7 @@ namespace Zomo.Core.Tests
             _config.Dispose();
 
             _config = new Config(ConfigFileLocation);
-            string value = _config.Get<string>(varName);
+            string value = (string) _config.Get<string>(varName);
 
             Assert.AreEqual(varValue, value);
         }

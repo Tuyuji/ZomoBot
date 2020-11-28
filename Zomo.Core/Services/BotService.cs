@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -33,14 +34,6 @@ namespace Zomo.Core.Services
         public void ServiceStart()
         {
             Logger.Write(ZomoApplication.Instance.AppName, "Bot service start.");
-            if (!_config.HasVar("Token"))
-            {
-                Console.Write("Token: ");
-                var token = Console.ReadLine();
-                Console.WriteLine("Saving...");
-                _config.Store("Token", token);
-                _config.Save();
-            }
 
             LoadPlugins();
 
@@ -51,9 +44,26 @@ namespace Zomo.Core.Services
             }
 
             _client.Log += Logger.Write;
+            _client.Connected += OnConnected;
 
-            _client.LoginAsync(TokenType.Bot, _config.Get<string>("Token"));
+            string token = Environment.GetEnvironmentVariable("ZOMO_BOT_TOKEN");
+            if(string.IsNullOrEmpty(token))
+                token = (string) _config.Get<string>("Token");
+
+            if (token == "")
+            {
+                this.Log("Failed to get token via config or env var.");
+                Environment.Exit(-1);
+            }
+            
+            _client.LoginAsync(TokenType.Bot, token);
             _client.StartAsync();
+        }
+
+        private Task OnConnected()
+        {
+            ZomoApplication.Instance.Status = BotStatus.Online;
+            return Task.CompletedTask;
         }
 
         private void LoadPlugins()
@@ -98,8 +108,12 @@ namespace Zomo.Core.Services
 
         public void ServiceDispose()
         {
+            ZomoApplication.Instance.Status = BotStatus.ShuttingDown;
+            
             foreach (var plugin in _plugins)
                 plugin?.Destroy();
+
+            ZomoApplication.Instance.Status = BotStatus.Offline;
         }
     }
 }

@@ -21,8 +21,8 @@ namespace Zomo.ShineBot.Modules
                 return;
             }
 
-            string[] images = _headpatConfig.Get<string[]>("images");
-            string[] lines = _headpatConfig.Get<string[]>("lines");
+            string[] images = (string[]) _headpatConfig.Get<string[]>("images");
+            string[] lines = (string[]) _headpatConfig.Get<string[]>("lines");
 
             Random random = new Random();
 

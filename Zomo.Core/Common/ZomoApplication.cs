@@ -11,6 +11,20 @@ using Zomo.Core.Interfaces;
 
 namespace Zomo.Core.Common
 {
+    public enum BotStatus
+    {
+        Offline,
+        Starting,
+        Online,
+        ShuttingDown
+    }
+
+    public enum BotError
+    {
+        UnknownError,
+        InvalidToken,
+    }
+
     public abstract class ZomoApplication
     {
         private static ZomoApplication _instance;
@@ -18,6 +32,7 @@ namespace Zomo.Core.Common
         private IServiceProvider _services;
         private string _appName;
         private Config _botConfig = new Config("bot.cfg");
+        private BotStatus _status;
         private DiscordSocketClient _client = new DiscordSocketClient();
         private CommandService _command = new CommandService();
         private Dictionary<Type, BotServiceInfo> _botServices = new Dictionary<Type, BotServiceInfo>();
@@ -29,14 +44,61 @@ namespace Zomo.Core.Common
         public DiscordSocketClient Client => _client;
         public CommandService CommandService => _command;
 
+        public BotStatus Status
+        {
+            get => _status;
+            set
+            {
+                var old = _status;
+                _status = value;
+                OnStatusUpdated?.Invoke(old);
+            }
+        }
+
+        //Old status
+        public Action<BotStatus> OnStatusUpdated;
+
         public ZomoApplication(string appName = "Zomo")
         {
             _instance = this;
             _appName = appName;
+            _status = BotStatus.Offline;
+        }
+
+        public virtual void OnError(BotError obj)
+        {
+            if (obj == BotError.InvalidToken)
+            {
+                string token = String.Empty;
+                while (token == String.Empty)
+                {
+                    Console.Write("Token: ");
+                    token = Console.ReadLine();
+                    if (token != String.Empty)
+                    {
+                        Console.WriteLine("Saving...");
+                        _botConfig.Store("Token", token);
+                        _botConfig.Save();   
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Token invalid.");
+                    }
+                }
+            }
         }
 
         public async Task Start()
         {
+            Status = BotStatus.Starting;
+
+            #if ZOMO_TEST_ERROR
+            OnError?.Invoke(BotError.UnknownError);
+            Status = BotStatus.Offline;
+            return;
+            #endif
+            
             var services = new ServiceCollection()
                 .AddSingleton(_client)
                 .AddSingleton(_botConfig)
@@ -64,6 +126,7 @@ namespace Zomo.Core.Common
 
             await Task.Delay(-1);
         }
+
 
         private void AddBotServices(ref IServiceCollection services)
         {

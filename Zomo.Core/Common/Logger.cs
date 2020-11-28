@@ -35,6 +35,16 @@ namespace Zomo.Core.Common
             Write("Module", message);
         }
 
+        public static void Log(this object obj, string message)
+        {
+            Write("Unknown", message);
+        }
+
+        public static void Log(this object obj, string source, string message)
+        {
+            Write(source, message);
+        }
+
         public static Task Write(LogMessage message)
         {
             Write(message.Source, message.Message);

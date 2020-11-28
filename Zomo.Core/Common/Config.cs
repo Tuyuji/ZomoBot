@@ -23,6 +23,7 @@ namespace Zomo.Core.Common
 
         public bool HasVar(string name)
         {
+            if (_data == null) return false;
             return _data[name] != null;
         }
         
@@ -31,8 +32,9 @@ namespace Zomo.Core.Common
             _data[name] = JToken.FromObject(value);
         }
 
-        public T Get<T>(string name)
+        public object Get<T>(string name)
         {
+            if (_data == null) return null;
             return _data[name].ToObject<T>();
         }
 

@@ -9,6 +9,7 @@ using Zomo.Core.Interfaces;
 
 namespace Zomo.Core.Modules
 {
+#if DEBUG
     public class DebuggingModule : ModuleBase<SocketCommandContext>
     {
         private readonly IServiceProvider _services;
@@ -48,4 +49,5 @@ namespace Zomo.Core.Modules
             await ReplyAsync("", false, builder.Build());
         }
     }
+#endif 
 }
